@@ -4,8 +4,8 @@ terraform {
     # 2. Uncomment the backend config below to switch to the created remote backend
 
     backend "s3" {
-        bucket         = "d0ej0hn-web-app-terraform-state" # REPLACE WITH YOUR BUCKET NAME
-        key            = "web-app/import-bootstrap/terraform.tfstate"
+        bucket         = "d0ej0hn-terraform-state" # REPLACE WITH YOUR BUCKET NAME
+        key            = "states/import-bootstrap/terraform.tfstate"
         region         = "eu-central-1"
         dynamodb_table = "terraform-state-locking"
         encrypt        = true
@@ -24,7 +24,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-    bucket = "d0ej0hn-web-app-terraform-state"
+    bucket = "d0ej0hn-terraform-state"
     force_destroy = true
 }
 
