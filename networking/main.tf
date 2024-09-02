@@ -87,3 +87,48 @@ resource "aws_route_table_association" "private_rt_association" {
     subnet_id = aws_subnet.private_subnet.id
     route_table_id = aws_vpc.vpc.default_route_table_id
 }
+
+
+#region Private Subnet Internet Access
+
+// Create elastic ip for the nat gateway
+resource "aws_eip" "elastic_ip" {
+
+    tags = local.tags
+}
+
+// Create the nat gateway in the public subnet and associate the public ip to it
+resource "aws_nat_gateway" "nat_gateway" {
+    allocation_id = aws_eip.elastic_ip.id
+    subnet_id = aws_subnet.public_subnet.id
+
+    tags = local.tags
+}
+
+// Route traffic from the private subnet to the NAT_GW
+resource "aws_route" "private_internet_traffic" {
+    route_table_id = aws_vpc.vpc.default_route_table_id
+    destination_cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
+}
+
+#endregion
+
+
+#region Instance Creation
+resource "aws_instance" "public_instance" {
+    ami = "ami-07652eda1fbad7432" // Ubuntu 24.04 Server 64bit-x86
+    instance_type = "t2.micro"
+    subnet_id = aws_subnet.public_subnet.id
+
+    tags = local.tags
+}
+
+resource "aws_instance" "private_instance" {
+    ami = "ami-07652eda1fbad7432" // Ubuntu 24.04 Server 64bit-x86
+    instance_type = "t2.micro"
+    subnet_id = aws_subnet.private_subnet.id
+
+    tags = local.tags
+}
+#endregion
