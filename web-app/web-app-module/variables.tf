@@ -4,6 +4,18 @@ variable "region" {
   type        = string
   default     = "eu-central-1"
 }
+
+variable "app_name" {
+  description = "Name of the web application"
+  type        = string
+  default     = "web-app"
+}
+
+variable "environment_name" {
+  description = "Deployment environment (dev/staging/production)"
+  type        = string
+  default     = "dev"
+}
 #endregion
 
 #region EC2
@@ -28,6 +40,12 @@ variable "bucket_prefix" {
 #endregion
 
 #region Route 53
+variable "create_dns_zone" {
+  description = "If true, create new route53 dns zone, if false read existing route53 zone"
+  type = bool
+  default = false
+}
+
 variable "domain" {
   description = "Domain for website"
   type        = string
@@ -49,20 +67,38 @@ variable "db_pass" {
   description = "Password for DB"
   type        = string
   sensitive   = true
+
+  validation {
+    condition = length(var.db_pass) >= 8
+    error_message = "The password must be at least 8 characters long"
+  }
 }
 
 variable "db_instance_class" {
     description = "The instance type of the DB"
     type        = string
+    default     = "db.t3.micro"
 }
 
 variable "db_instance_version" {
     description = "The postgres version to use for the DB"
     type        = string
+    default     = "16"
 }
 
 variable "db_allocated_storage" {
     description = "The storage size of the db"
     type        = string
+    default     = "5"
+}
+#endregion
+
+#region Locals
+locals {
+  tags = merge(
+    {
+      "belongs_to_project": "Web-App"
+    }
+  )
 }
 #endregion
